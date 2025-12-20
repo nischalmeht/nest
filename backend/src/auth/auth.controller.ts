@@ -1,15 +1,18 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { UsersService } from 'src/users/users.service';
+import { AuthGuard } from './auth.guard';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private readonly authService: AuthService) { }
-    // @Get('login')
-    // login(){
-    //     return {message:"Login Successfull"}
-    // }
+    constructor(
+        private readonly authService: AuthService,
+        private readonly userService:UsersService
+
+    ) { }
+
     @Post('register')
     async register(@Body() registerUserDto: RegisterDto) {
         const token = await this.authService.registerUser(registerUserDto);
@@ -17,7 +20,19 @@ export class AuthController {
     }
     @Post('login')
     async login(@Body() loginDto: LoginDto) {
+        console.log('loginDto controller', loginDto);
         const token = await this.authService.login(loginDto);
         return token;
+    }
+    @UseGuards(AuthGuard)
+    @Get('profile')
+    async getProfile(@Request() req) {
+        const userId = req.user.sub;
+        const user = await this.userService.getUserById(userId);
+        return {
+            id:user?._id,
+            name:user?.name,
+            email:user?.email
+        }
     }
 }

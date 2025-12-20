@@ -26,6 +26,12 @@ export class UsersService {
     }
     async findByEmail(email: string) {
       // include password (schema sets select: false by default)
-      return this.userModel.findOne({ email }).select('+password').lean().exec();
+      // return the mongoose document (no .lean()) so schema instance methods are available
+      let res=await this.userModel.findOne({ email }).select('+password').exec()
+      console.log("working",res)
+      return res
     }
+  async getUserById(id: string) {
+    return await this.userModel.findOne({ _id: id });
+  }
 }

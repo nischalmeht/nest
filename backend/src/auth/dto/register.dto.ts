@@ -1,6 +1,7 @@
 import {
   IsEmail,
   IsNotEmpty,
+  IsOptional,
   IsString,
   MaxLength,
   MinLength,
@@ -19,4 +20,7 @@ export class RegisterDto {
   @IsNotEmpty({ message: 'Password is required! Please provide Password' })
   @MinLength(6, { message: 'Password must be at least 6 charaters long' })
   password: string;
+
+  @IsOptional()
+  role?: string;
 }
