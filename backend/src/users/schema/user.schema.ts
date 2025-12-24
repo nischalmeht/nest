@@ -13,6 +13,9 @@ export class User {
   })
   name: string;
 
+    @Prop()
+    id: string;
+
   @Prop({
     required: true,
     unique: true,
@@ -28,7 +31,7 @@ export class User {
   password: string;
 
   @Prop({
-    enum: ['admin', 'manager'],
+    enum: ['admin', 'manager','waiter'],
     default: 'manager',
   })
   role: string;
@@ -36,17 +39,17 @@ export class User {
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-/* 🔐 Password Hashing Middleware */
-UserSchema.pre<UserDocument>('save', async function (next) {
-  if (!this.isModified('password')) return next();
+// /* 🔐 Password Hashing Middleware */
+// UserSchema.pre<UserDocument>('save', async function (next) {
+//   if (!this.isModified('password')) return next();
 
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
-});
+//   this.password = await bcrypt.hash(this.password, 10);
+//   next();
+// });
 
-/* 🔍 Compare Password */
-UserSchema.methods.comparePassword = async function (
-  candidatePassword: string,
-): Promise<boolean> {
-  return bcrypt.compare(candidatePassword, this.password);
-};
+// /* 🔍 Compare Password */
+// UserSchema.methods.comparePassword = async function (
+//   candidatePassword: string,
+// ): Promise<boolean> {
+//   return bcrypt.compare(candidatePassword, this.password);
+// };

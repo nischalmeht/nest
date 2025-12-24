@@ -1,11 +1,13 @@
 import {
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { UserRole } from 'src/users/users.service';
 
 export class RegisterDto {
   @IsEmail({}, { message: 'Please provide a valid email' })
@@ -20,7 +22,7 @@ export class RegisterDto {
   @IsNotEmpty({ message: 'Password is required! Please provide Password' })
   @MinLength(6, { message: 'Password must be at least 6 charaters long' })
   password: string;
-
   @IsOptional()
-  role?: string;
+  @IsEnum(UserRole, { message: 'Role must be either mangage or admin' })
+  role?: UserRole;
 }

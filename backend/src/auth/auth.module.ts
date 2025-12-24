@@ -1,9 +1,13 @@
 import { Module } from '@nestjs/common';
+import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UsersModule } from 'src/users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthGuard } from './auth.guard';
+import { RolesGuard } from './guards/roles.guard';
+import { JwtStrategy } from './strategies/jwt.stragies';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -12,6 +16,15 @@ import { AuthGuard } from './auth.guard';
     //   secret: process.env.JWT_SECRET || 'default_jwt_secret',
     //   signOptions: { expiresIn: '1d' },
     // }),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60000,
+          limit: 10,
+        },
+      ],
+    }),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET  || 'default_jwt_secret',
@@ -19,6 +32,8 @@ import { AuthGuard } from './auth.guard';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthGuard],
+  providers: [AuthService,RolesGuard,JwtStrategy],
+  exports: [AuthService, RolesGuard],
+
 })
 export class AuthModule {}
