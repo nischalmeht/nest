@@ -7,7 +7,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthGuard } from './auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { JwtStrategy } from './strategies/jwt.stragies';
-import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -16,14 +15,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
     //   secret: process.env.JWT_SECRET || 'default_jwt_secret',
     //   signOptions: { expiresIn: '1d' },
     // }),
-    ThrottlerModule.forRoot({
-      throttlers: [
-        {
-          ttl: 60000,
-          limit: 10,
-        },
-      ],
-    }),
+
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       global: true,

@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { Document, Types } from 'mongoose';
 
 export type MenuItemDocument = MenuItem & Document;
@@ -19,7 +19,8 @@ export class MenuItem {
 
   @Prop({ default: true })
   isAvailable: boolean;
-
+  
+  @IsOptional()
   @Prop()
   imageUrl?: string;
 

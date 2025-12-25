@@ -5,18 +5,22 @@ import { InjectModel } from '@nestjs/mongoose';
 import { CreateMenuItemDto } from './dto/CreateMenuItem.dto';
 import { MenuItem, MenuItemDocument } from './schema/menu-item.schema';
 import { CreateMenuCategoryDto } from './dto/CreateMenuCategory.dto';
-
+import { CloudinaryService } from './cloudinary/cloudinary.service';
 @Injectable()
 export class MenuService {
   constructor(@InjectModel(MenuCategory.name)
   private menuCategoryModel: Model<MenuCategoryDocument>,
  @InjectModel(MenuItem.name)
     private readonly menuItemModel: Model<MenuItemDocument>,
+      private readonly cloudinaryService: CloudinaryService,
 ) { }
-  async create(createMenuDto:CreateMenuCategoryDto) {
+  async create(createMenuDto:CreateMenuCategoryDto,) {
+     const cloudinaryResponse = await this.cloudinaryService.uploadFile(createMenuDto?.imageUrl);
+
     const exists = await this.menuCategoryModel.findOne({
       name: createMenuDto.name,
       hotelId: createMenuDto.hotelId,
+       imageUrl: cloudinaryResponse?.secure_url,
       isActive: true,
     });
 

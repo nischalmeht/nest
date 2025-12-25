@@ -1,15 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateHotelDto } from './dto/create-hotel.dto';
 import { UpdateHotelDto } from './dto/update-hotel.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Hotel, HotelDocument } from './schema/hotel.schema';
 import { Model } from 'mongoose';
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 // import { InjectRepository } from '@nestjs/typeorm';
 @Injectable()
 export class HotelService {
-  constructor( @InjectModel(Hotel.name)
-   @InjectModel(Hotel.name)
-    private hotelModel: Model<HotelDocument>,){}
+  constructor(
+    @InjectModel(Hotel.name) private hotelModel: Model<HotelDocument>,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+  ) { }
   async createHotel(createHotelDto: CreateHotelDto) {
     const hotel = new this.hotelModel({
       ...createHotelDto,
@@ -21,13 +23,19 @@ export class HotelService {
   }
 
   findAll() {
-   return this.hotelModel
+    return this.hotelModel
       .find({ isActive: true })
       .sort({ createdAt: -1 });
-  
+
   }
 
   async findOne(id: string) {
+    const cachedHotel = await this.cacheManager.get(`hotel:${id}`);
+    if (cachedHotel) 
+      {
+        console.log('Returning cached hotel');
+        return cachedHotel;
+      }
     const hotel = await this.hotelModel.findOne({
       _id: id,
       isActive: true,
@@ -36,14 +44,14 @@ export class HotelService {
     if (!hotel) {
       throw new NotFoundException('Hotel not found');
     }
-
+    await this.cacheManager.set(`hotel:${id}`, hotel, 60);
     return hotel;
   }
 
   update(id: number, updateHotelDto: UpdateHotelDto) {
     return `This action updates a #${id} hotel`;
   }
-async softDelete(id: string) {
+  async softDelete(id: string) {
     const hotel = await this.hotelModel.findByIdAndUpdate(
       id,
       { isActive: false },

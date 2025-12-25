@@ -12,14 +12,33 @@ import { MenuModule } from './menu/menu.module';
 import { JwtModule } from '@nestjs/jwt';
 import { User, UserSchema } from './users/schema/user.schema';
 import { CacheModule } from '@nestjs/cache-manager';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { FileUploadModule } from './file-upload/file-upload.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(),AuthModule, 
+  imports: [AuthModule, 
+      ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     UsersModule,MongooseModule.forRoot(process.env.MONGO_URI as string),
      CourseModule, FloorModule, HotelModule, MenuModule,
      JwtModule.register({}),
+         ThrottlerModule.forRoot({
+           throttlers: [
+             {
+               ttl: 60000,
+               limit: 10,
+             },
+           ],
+         }),
+            CacheModule.register({
+           isGlobal: true,
+           ttl: 30000,
+           max: 100,
+         }),
     // imports: [
         MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    FileUploadModule,
       // ],
     ],
   controllers: [AppController],
